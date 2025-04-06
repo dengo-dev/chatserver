@@ -47,11 +47,12 @@ export default {
       stompClient: null,
       token: "",
       senderEmail: null,
-
+      roomId: null,
     }
   },
   created(){
     this.senderEmail = localStorage.getItem("email");
+    this.roomId = this.$route.params.roomId;
     this.connectWebSocket();
   },
   //사용자가 현재 라우트에서 다른 라우트로 이동하려고 할 때 호출되는 훅 함수.
@@ -75,7 +76,7 @@ export default {
 
           },
           ()=>{
-            this.stompClient.subscribe(`/topic/1`,(message)=>{
+            this.stompClient.subscribe(`/topic/${this.roomId}`,(message)=>{
               const parseMessage = JSON.parse(message.body)
               this.messages.push(parseMessage);
               this.scrollToBottom();
@@ -91,7 +92,7 @@ export default {
         senderEmail: this.senderEmail,
         message: this.newMessage
       }
-      this.stompClient.send(`/publish/1`,JSON.stringify(message));
+      this.stompClient.send(`/publish/${this.roomId}`,JSON.stringify(message));
       this.newMessage="";
     },
     scrollToBottom(){
@@ -102,7 +103,7 @@ export default {
     },
     disconnectWebSocket(){
       if (this.stompClient && this.stompClient.connected) {
-        this.stompClient.unsubscribe(`/topic/1`);
+        this.stompClient.unsubscribe(`/topic/${this.roomId}`);
         this.stompClient.disconnect();
       }
     }
